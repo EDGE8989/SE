@@ -1,0 +1,142 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Pending Approvals{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <h2 class="h3 mb-3">Pending Content Approvals</h2>
+        <p class="text-secondary">Review and approve submissions from Club Presidents.</p>
+    </div>
+</div>
+
+<div class="d-grid gap-4">
+    <!-- Pending Events -->
+    <div class="admin-table-card">
+        <div class="admin-table-header bg-light">
+            <h3 class="admin-table-title m-0"><i class="fa-solid fa-calendar-day text-primary mr-2"></i> Pending Events <span class="badge badge-warning ml-2">{{ pending_events|length }}</span></h3>
+        </div>
+        <div class="table-responsive p-3">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date Submitted</th>
+                        <th>Title</th>
+                        <th>Club</th>
+                        <th>Event Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in pending_events %}
+                    <tr>
+                        <td class="text-muted text-sm">{{ event.created_at.strftime('%d %b %Y, %H:%M') }}</td>
+                        <td class="fw-medium">{{ event.title }}</td>
+                        <td>{{ event.club.name if event.club else 'None' }}</td>
+                        <td>{{ event.date.strftime('%d %b %Y') if event.date else 'TBD' }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('events.update_status', id=event.id) }}" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="status" value="approved">
+                                <button type="submit" class="btn btn-sm btn-success"><i class="fa-solid fa-check"></i> Approve</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('events.update_status', id=event.id) }}" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="status" value="rejected">
+                                <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-xmark"></i> Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center text-muted py-4">No pending events.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pending Notices -->
+    <div class="admin-table-card">
+        <div class="admin-table-header bg-light">
+            <h3 class="admin-table-title m-0"><i class="fa-solid fa-bullhorn text-warning mr-2"></i> Pending Notices <span class="badge badge-warning ml-2">{{ pending_notices|length }}</span></h3>
+        </div>
+        <div class="table-responsive p-3">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date Submitted</th>
+                        <th>Title</th>
+                        <th>Club</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for notice in pending_notices %}
+                    <tr>
+                        <td class="text-muted text-sm">{{ notice.created_at.strftime('%d %b %Y, %H:%M') }}</td>
+                        <td class="fw-medium">{{ notice.title }}</td>
+                        <td>{{ notice.club.name if notice.club else 'None' }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('notices.update_status', id=notice.id) }}" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="status" value="approved">
+                                <button type="submit" class="btn btn-sm btn-success"><i class="fa-solid fa-check"></i> Approve</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('notices.update_status', id=notice.id) }}" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="status" value="rejected">
+                                <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-xmark"></i> Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center text-muted py-4">No pending notices.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Pending Workshops -->
+    <div class="admin-table-card">
+        <div class="admin-table-header bg-light">
+            <h3 class="admin-table-title m-0"><i class="fa-solid fa-chalkboard-user text-info mr-2"></i> Pending Workshops <span class="badge badge-warning ml-2">{{ pending_workshops|length }}</span></h3>
+        </div>
+        <div class="table-responsive p-3">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date Submitted</th>
+                        <th>Title</th>
+                        <th>Speaker</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for workshop in pending_workshops %}
+                    <tr>
+                        <td class="text-muted text-sm">{{ workshop.created_at.strftime('%d %b %Y, %H:%M') }}</td>
+                        <td class="fw-medium">{{ workshop.title }}</td>
+                        <td>{{ workshop.speaker }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('workshops.update_status', id=workshop.id) }}" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="status" value="approved">
+                                <button type="submit" class="btn btn-sm btn-success"><i class="fa-solid fa-check"></i> Approve</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('workshops.update_status', id=workshop.id) }}" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="status" value="rejected">
+                                <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-xmark"></i> Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center text-muted py-4">No pending workshops.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

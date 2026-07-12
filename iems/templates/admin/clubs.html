@@ -1,0 +1,124 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Manage Clubs{% endblock %}
+
+{% block content %}
+<div class="admin-table-card">
+    <div class="admin-table-header">
+        <h3 class="admin-table-title">Clubs Management</h3>
+        <div class="admin-table-actions">
+            <button class="btn btn-primary btn-sm" onclick="document.getElementById('addClubModal').style.display='flex'"><i class="fa-solid fa-plus"></i> Add New Club</button>
+        </div>
+    </div>
+    <div class="table-responsive p-3">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Logo</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>President</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for club in clubs %}
+                <tr>
+                    <td><img src="{{ club.logo_url }}" alt="Logo" style="width: 40px; height: 40px; border-radius: 8px; object-fit: contain; background: #f8f9fa;"></td>
+                    <td class="fw-medium">{{ club.name }}</td>
+                    <td><span class="badge badge-secondary">{{ club.category | title }}</span></td>
+                    <td>{{ club.president }}</td>
+                    <td>
+                        {% if club.is_active %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-danger">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <form method="POST" action="{{ url_for('clubs.toggle_status', id=club.id) }}" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm {% if club.is_active %}btn-outline{% else %}btn-success{% endif %}">
+                                    {% if club.is_active %}Deactivate{% else %}Activate{% endif %}
+                                </button>
+                            </form>
+                            {% if current_user.is_super_admin %}
+                            <form method="POST" action="{{ url_for('clubs.delete', id=club.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this club? This action cannot be undone.');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-outline text-danger"><i class="fa-solid fa-trash"></i></button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">No clubs found. Add one to get started.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Club Modal -->
+<div id="addClubModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+        <div class="d-flex justify-between align-center mb-4">
+            <h3 class="m-0">Add New Club</h3>
+            <button onclick="document.getElementById('addClubModal').style.display='none'" class="btn btn-sm btn-outline" style="border: none;"><i class="fa-solid fa-xmark" style="font-size: 1.5rem;"></i></button>
+        </div>
+        
+        <form method="POST" action="{{ url_for('clubs.add') }}" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
+                <div class="form-group">
+                    <label class="form-label">Club Name</label>
+                    <input type="text" name="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select name="category" class="form-control" required>
+                        <option value="technical">Technical</option>
+                        <option value="cultural">Cultural</option>
+                        <option value="sports">Sports</option>
+                        <option value="general">General</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">President Name</label>
+                    <input type="text" name="president" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Faculty Advisor</label>
+                    <input type="text" name="faculty" class="form-control">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Contact Email</label>
+                <input type="email" name="email" class="form-control">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-control" rows="4"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Club Logo</label>
+                <input type="file" name="logo" class="form-control" accept="image/*">
+                <small class="text-muted">Allowed formats: PNG, JPG, WEBP. Max 5MB.</small>
+            </div>
+            
+            <div class="d-flex justify-end gap-2 mt-4 pt-3 border-top">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('addClubModal').style.display='none'">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Club</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

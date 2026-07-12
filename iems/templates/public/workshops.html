@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Workshops & Seminars{% endblock %}
+
+{% block content %}
+<section class="section bg-white">
+    <div class="container">
+        <div class="section-header">
+            <h2>Workshops & Seminars</h2>
+            <p>Enhance your skills with expert-led technical and professional workshops.</p>
+        </div>
+        
+        <h3 class="mb-4">Upcoming Workshops</h3>
+        <div class="cards-grid mb-5">
+            {% for workshop in upcoming %}
+            <div class="card card-hover p-0" style="overflow: hidden; border-top: 4px solid var(--accent-blue);">
+                <div class="p-4">
+                    <div class="d-flex justify-between mb-3">
+                        <div class="badge badge-primary">Workshop</div>
+                        <div class="text-sm fw-bold text-danger"><i class="fa-regular fa-calendar"></i> {{ workshop.date.strftime('%d %b %Y') }}</div>
+                    </div>
+                    <h4 class="mb-2">{{ workshop.title }}</h4>
+                    <p class="text-sm text-secondary mb-3">{{ workshop.description }}</p>
+                    
+                    <div class="bg-light p-3 rounded mb-3">
+                        <div class="d-flex align-center gap-2 mb-2 text-sm">
+                            <i class="fa-solid fa-microphone text-accent-blue" style="width: 16px;"></i> 
+                            <span class="fw-medium">Speaker:</span> {{ workshop.speaker }}
+                        </div>
+                        <div class="d-flex align-center gap-2 mb-2 text-sm">
+                            <i class="fa-regular fa-clock text-accent-blue" style="width: 16px;"></i> 
+                            <span class="fw-medium">Time:</span> {{ workshop.time.strftime('%I:%M %p') if workshop.time else 'TBD' }}
+                        </div>
+                        <div class="d-flex align-center gap-2 text-sm">
+                            <i class="fa-solid fa-location-dot text-accent-blue" style="width: 16px;"></i> 
+                            <span class="fw-medium">Venue:</span> {{ workshop.venue }}
+                        </div>
+                    </div>
+                    
+                    <a href="{{ url_for('registration.register', item_type='workshop', item_id=workshop.id) }}" class="btn btn-primary" style="width: 100%;">Register Now</a>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-span-full card p-5 text-center text-muted">
+                No upcoming workshops currently scheduled.
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if past %}
+        <h3 class="mb-4 mt-5">Past Workshops</h3>
+        <div class="cards-grid">
+            {% for workshop in past %}
+            <div class="card p-3" style="opacity: 0.8;">
+                <div class="d-flex justify-between align-center mb-2">
+                    <h5 class="m-0">{{ workshop.title }}</h5>
+                    <div class="text-xs text-muted">{{ workshop.date.strftime('%b %Y') }}</div>
+                </div>
+                <p class="text-xs text-secondary m-0">By {{ workshop.speaker }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

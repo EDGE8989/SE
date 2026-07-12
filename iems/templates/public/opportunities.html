@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Career Opportunities{% endblock %}
+
+{% block content %}
+<section class="section bg-white">
+    <div class="container">
+        <div class="section-header">
+            <h2>Career Opportunities</h2>
+            <p>Internships, jobs, fellowships, and competitive opportunities for our students.</p>
+        </div>
+        
+        <div class="mb-4 d-flex gap-2">
+            <a href="{{ url_for('public.opportunities') }}" class="btn {% if not opp_type %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">All</a>
+            <a href="{{ url_for('public.opportunities', type='internship') }}" class="btn {% if opp_type == 'internship' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">Internships</a>
+            <a href="{{ url_for('public.opportunities', type='job') }}" class="btn {% if opp_type == 'job' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">Jobs</a>
+            <a href="{{ url_for('public.opportunities', type='fellowship') }}" class="btn {% if opp_type == 'fellowship' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">Fellowships</a>
+            <a href="{{ url_for('public.opportunities', type='competition') }}" class="btn {% if opp_type == 'competition' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">Competitions</a>
+        </div>
+        
+        <div class="cards-grid" style="grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));">
+            {% for opp in opportunities %}
+            <div class="card card-hover d-flex gap-3" style="{% if not opp.is_active %}opacity: 0.6; filter: grayscale(1);{% endif %}">
+                <div style="width: 56px; height: 56px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--accent-blue)); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; flex-shrink: 0;">
+                    {{ opp.company[0].upper() if opp.company else opp.title[0].upper() }}
+                </div>
+                <div style="flex: 1;">
+                    <div class="d-flex justify-between align-start mb-1">
+                        <h4 class="m-0 text-lg">{{ opp.title }}</h4>
+                        <div class="badge badge-secondary text-xs">{{ opp.type_display }}</div>
+                    </div>
+                    <p class="text-sm fw-medium text-primary mb-2"><i class="fa-solid fa-building"></i> {{ opp.company }} {% if opp.location %}<span class="text-muted ml-2"><i class="fa-solid fa-location-dot"></i> {{ opp.location }}</span>{% endif %}</p>
+                    
+                    <p class="text-sm text-secondary mb-3">{{ opp.description[:120] }}...</p>
+                    
+                    <div class="d-flex justify-between align-center mt-auto border-top pt-3">
+                        <div>
+                            {% if opp.stipend %}
+                            <div class="text-sm fw-bold text-success">{{ opp.stipend }}</div>
+                            {% endif %}
+                            <div class="text-xs text-danger {% if opp.stipend %}mt-1{% endif %}">Deadline: {{ opp.deadline.strftime('%d %b %Y') if opp.deadline else 'Open' }}</div>
+                        </div>
+                        
+                        {% if opp.is_active %}
+                        <a href="{{ url_for('registration.register', item_type='opportunity', item_id=opp.id) }}" class="btn btn-outline btn-sm">Apply</a>
+                        {% elif not opp.is_active %}
+                        <span class="badge badge-danger">Closed</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-span-full p-5 text-center text-muted card bg-light border-0">
+                No opportunities available at the moment.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

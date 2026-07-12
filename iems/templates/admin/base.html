@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %} - IEMS Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+</head>
+<body>
+    <div class="admin-body">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="{{ url_for('admin.dashboard') }}" class="sidebar-logo">
+                    <span class="sidebar-logo-mark">IE</span>
+                    <span>
+                        <span class="sidebar-logo-text">IEMS Admin</span>
+                        <span class="sidebar-logo-subtext">Content Operations</span>
+                    </span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Overview</div>
+                <a href="{{ url_for('admin.dashboard') }}" class="nav-item {% if request.endpoint == 'admin.dashboard' %}active{% endif %}"><i class="fa-solid fa-gauge"></i> <span>Dashboard</span></a>
+                <a href="{{ url_for('registrations.index') }}" class="nav-item {% if request.endpoint and request.endpoint.startswith('registrations.') %}active{% endif %}"><i class="fa-solid fa-clipboard-list"></i> <span>Registrations</span></a>
+                {% if current_user.is_super_admin %}
+                <a href="{{ url_for('admin_access_requests.index') }}" class="nav-item {% if request.endpoint and request.endpoint.startswith('admin_access_requests.') %}active{% endif %}"><i class="fa-solid fa-user-shield"></i> <span>Access Requests</span></a>
+                {% endif %}
+                
+                <div class="nav-section-label">Content</div>
+                <a href="{{ url_for('events.index') }}" class="nav-item {% if request.endpoint and request.endpoint.startswith('events.') %}active{% endif %}"><i class="fa-solid fa-calendar"></i> <span>Events</span></a>
+                <a href="{{ url_for('notices.index') }}" class="nav-item {% if request.endpoint and request.endpoint.startswith('notices.') %}active{% endif %}"><i class="fa-solid fa-bullhorn"></i> <span>Notices</span></a>
+                <a href="{{ url_for('workshops.index') }}" class="nav-item {% if request.endpoint and request.endpoint.startswith('workshops.') %}active{% endif %}"><i class="fa-solid fa-chalkboard-user"></i> <span>Workshops</span></a>
+                
+                {% if current_user.role in ('super_admin', 'college_admin') %}
+                <a href="{{ url_for('scholarships.index') }}" class="nav-item {% if request.endpoint and request.endpoint.startswith('scholarships.') %}active{% endif %}"><i class="fa-solid fa-graduation-cap"></i> <span>Scholarships</span></a>
+                <a href="{{ url_for('opportunities.index') }}" class="nav-item {% if request.endpoint and request.endpoint.startswith('opportunities.') %}active{% endif %}"><i class="fa-solid fa-briefcase"></i> <span>Opportunities</span></a>
+                <a href="{{ url_for('calendar.index') }}" class="nav-item {% if request.endpoint and request.endpoint.startswith('calendar.') %}active{% endif %}"><i class="fa-solid fa-calendar-days"></i> <span>Calendar</span></a>
+                <a href="{{ url_for('clubs.index') }}" class="nav-item {% if request.endpoint and request.endpoint.startswith('clubs.') %}active{% endif %}"><i class="fa-solid fa-users"></i> <span>Clubs</span></a>
+                {% endif %}
+                
+                {% if current_user.is_super_admin %}
+                <a href="{{ url_for('users.index') }}" class="nav-item {% if request.endpoint and request.endpoint.startswith('users.') %}active{% endif %}"><i class="fa-solid fa-users-gear"></i> <span>Users</span></a>
+                {% endif %}
+                <a href="{{ url_for('public.home') }}" class="nav-item"><i class="fa-solid fa-arrow-up-right-from-square"></i> <span>Public Site</span></a>
+            </nav>
+        </aside>
+        
+        <main class="admin-main">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <ul class="breadcrumb">
+                        <li>Admin</li>
+                        <li class="active">{{ self.title() }}</li>
+                    </ul>
+                    <h1 class="page-title">{% block page_heading %}{{ self.title() }}{% endblock %}</h1>
+                </div>
+                <div class="topbar-right">
+                    <button class="btn btn-secondary icon-btn admin-mobile-toggle" type="button" aria-label="Open sidebar"><i class="fa-solid fa-bars"></i></button>
+                    <div class="user-info">
+                        <span class="user-name">{{ current_user.name }}</span>
+                        <span class="user-role">{{ current_user.role_display }}</span>
+                    </div>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary btn-sm">Logout</a>
+                </div>
+            </header>
+            
+            <div class="admin-content">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

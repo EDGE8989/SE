@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block content %}
+<section class="section bg-white">
+    <div class="container">
+        <div class="card p-0" style="overflow: hidden; max-width: 900px; margin: 0 auto;">
+            <img src="{{ event.image_url }}" alt="{{ event.title }}" style="width: 100%; height: 400px; object-fit: cover;">
+            
+            <div class="p-4 p-md-5">
+                <div class="d-flex justify-between align-center mb-3">
+                    {% if event.club %}
+                    <a href="{{ url_for('public.club_detail', club_id=event.club.id) }}" class="badge badge-primary text-decoration-none">{{ event.club.name }}</a>
+                    {% else %}
+                    <div class="badge badge-secondary">College Event</div>
+                    {% endif %}
+                    
+                    {% if event.is_upcoming %}
+                    <div class="badge badge-success">Upcoming</div>
+                    {% else %}
+                    <div class="badge badge-secondary">Past</div>
+                    {% endif %}
+                </div>
+                
+                <h1 class="mb-4">{{ event.title }}</h1>
+                
+                <div class="d-flex flex-wrap gap-4 mb-4 pb-4 border-bottom">
+                    <div class="d-flex align-center gap-2 text-secondary">
+                        <i class="fa-regular fa-calendar-check" style="font-size: 1.5rem; color: var(--accent-blue);"></i>
+                        <div>
+                            <div class="text-xs fw-bold text-muted text-uppercase">Date</div>
+                            <div class="fw-medium">{{ event.date.strftime('%d %B %Y') }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-center gap-2 text-secondary">
+                        <i class="fa-regular fa-clock" style="font-size: 1.5rem; color: var(--accent-blue);"></i>
+                        <div>
+                            <div class="text-xs fw-bold text-muted text-uppercase">Time</div>
+                            <div class="fw-medium">{{ event.time.strftime('%I:%M %p') if event.time else 'TBD' }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-center gap-2 text-secondary">
+                        <i class="fa-solid fa-location-dot" style="font-size: 1.5rem; color: var(--accent-blue);"></i>
+                        <div>
+                            <div class="text-xs fw-bold text-muted text-uppercase">Venue</div>
+                            <div class="fw-medium">{{ event.venue }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h4>About the Event</h4>
+                    <p class="mt-2 text-secondary" style="white-space: pre-wrap;">{{ event.description }}</p>
+                </div>
+                
+                {% if event.is_upcoming %}
+                <div class="mt-4 pt-4 border-top text-center">
+                    <a href="{{ url_for('registration.register', item_type='event', item_id=event.id) }}" class="btn btn-primary btn-lg"><i class="fa-solid fa-ticket"></i> Register Now</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

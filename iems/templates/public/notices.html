@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Notice Board{% endblock %}
+
+{% block content %}
+<section class="section bg-white">
+    <div class="container" style="max-width: 900px;">
+        <div class="section-header">
+            <h2>Official Notice Board</h2>
+            <p>Important updates, announcements, and circulars from the administration and clubs.</p>
+        </div>
+        
+        <div class="mb-4 d-flex gap-2">
+            <a href="{{ url_for('public.notices') }}" class="btn {% if not category %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">All</a>
+            <a href="{{ url_for('public.notices', category='academic') }}" class="btn {% if category == 'academic' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">Academic</a>
+            <a href="{{ url_for('public.notices', category='general') }}" class="btn {% if category == 'general' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">General</a>
+            <a href="{{ url_for('public.notices', category='club') }}" class="btn {% if category == 'club' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">Club</a>
+            <a href="{{ url_for('public.notices', category='recruitment') }}" class="btn {% if category == 'recruitment' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">Recruitment</a>
+        </div>
+        
+        <div class="card p-0">
+            {% for notice in pagination.items %}
+            <div class="notice-item d-flex gap-3 p-4 border-bottom {% if loop.last %}border-0{% endif %}">
+                <div class="notice-icon" style="width: 48px; height: 48px; border-radius: 12px; background: #F1F5F9; color: var(--accent-blue); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                    {% if notice.category == 'academic' %}<i class="fa-solid fa-graduation-cap"></i>
+                    {% elif notice.category == 'club' %}<i class="fa-solid fa-users"></i>
+                    {% elif notice.category == 'recruitment' %}<i class="fa-solid fa-briefcase"></i>
+                    {% else %}<i class="fa-solid fa-bullhorn"></i>{% endif %}
+                </div>
+                <div style="flex: 1;">
+                    <div class="d-flex justify-between align-start mb-1">
+                        <h5 class="m-0">{{ notice.title }}</h5>
+                        <div class="badge badge-secondary text-xs">{{ notice.category_display }}</div>
+                    </div>
+                    <p class="text-sm text-muted mb-2">Posted on {{ notice.created_at.strftime('%B %d, %Y') }} {% if notice.club %}by {{ notice.club.name }}{% endif %}</p>
+                    <p class="text-secondary text-sm mb-2">{{ notice.description }}</p>
+                    {% if notice.attachment %}
+                    <a href="{{ notice.attachment_url }}" target="_blank" class="btn btn-outline btn-sm mt-1"><i class="fa-solid fa-download"></i> Download Attachment</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="p-5 text-center text-muted">
+                No notices available at the moment.
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="d-flex justify-center gap-1 mt-4">
+            {% if pagination.has_prev %}
+            <a href="{{ url_for('public.notices', page=pagination.prev_num, category=category) }}" class="btn btn-secondary btn-sm">&laquo; Prev</a>
+            {% endif %}
+            
+            {% if pagination.has_next %}
+            <a href="{{ url_for('public.notices', page=pagination.next_num, category=category) }}" class="btn btn-secondary btn-sm">Next &raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

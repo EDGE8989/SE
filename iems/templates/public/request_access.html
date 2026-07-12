@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Request Portal Access{% endblock %}
+
+{% block content %}
+<section class="section bg-white">
+    <div class="container" style="max-width: 640px;">
+        <div class="card" style="border-top: 4px solid var(--primary); padding: 2rem; box-shadow: var(--shadow-md);">
+            <div class="mb-4 text-center">
+                <div class="badge badge-primary mb-2" style="text-transform: uppercase; font-weight: 700;">Authority Registration</div>
+                <h2 class="mb-1">Request Portal Access</h2>
+                <p class="text-sm text-secondary">Are you a club president, faculty advisor, or college administrator? Apply here for access to the management dashboard.</p>
+            </div>
+            
+            <form method="POST" action="{{ url_for('access_request.apply') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="form-group mb-3">
+                    <label class="form-label fw-semibold">Full Name *</label>
+                    <input type="text" name="name" class="form-control" placeholder="Enter your full name" required style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-md);">
+                </div>
+                
+                <div class="d-grid gap-3 mb-3" style="grid-template-columns: 1fr 1fr;">
+                    <div class="form-group">
+                        <label class="form-label fw-semibold">Official Email Address *</label>
+                        <input type="email" name="email" class="form-control" placeholder="username@iems.edu" required style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-md);">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label fw-semibold">Phone Number</label>
+                        <input type="tel" name="phone" class="form-control" placeholder="+91 98765 43210" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-md);">
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-3 mb-3" style="grid-template-columns: 1fr 1fr;">
+                    <div class="form-group">
+                        <label class="form-label fw-semibold">Requested Role *</label>
+                        <select name="requested_role" id="roleSelect" class="form-control" required onchange="toggleClubFields()" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-md); background: #fff;">
+                            <option value="">Select Role</option>
+                            <option value="club_president">Club / Society President</option>
+                            <option value="college_admin">College Administrator</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label fw-semibold">Your Designation / Title</label>
+                        <input type="text" name="designation" class="form-control" placeholder="e.g. Student Coordinator, President" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-md);">
+                    </div>
+                </div>
+                
+                <div id="clubSelectGroup" class="form-group mb-3" style="display: none;">
+                    <label class="form-label fw-semibold">Select Existing Club *</label>
+                    <select name="club_id" id="clubSelect" class="form-control" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-md); background: #fff;">
+                        <option value="">-- Select Existing Club --</option>
+                        {% for club in clubs %}
+                        <option value="{{ club.id }}">{{ club.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="text-xs text-muted mt-1">If your club is not listed, leave this blank and enter the name below.</div>
+                </div>
+
+                <div id="newClubGroup" class="form-group mb-3" style="display: none;">
+                    <label class="form-label fw-semibold">New Club Name (if not listed above)</label>
+                    <input type="text" name="club_name" class="form-control" placeholder="Enter new club / society name" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-md);">
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label class="form-label fw-semibold">Justification / Reason for Access *</label>
+                    <textarea name="reason" class="form-control" rows="4" placeholder="Briefly state your purpose, role in the club, or coordinator details for verification." required style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-md); font-family: inherit;"></textarea>
+                </div>
+                
+                <div class="d-flex justify-end gap-2 mt-4 pt-3 border-top">
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">Back to Login</a>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    function toggleClubFields() {
+        const role = document.getElementById('roleSelect').value;
+        const clubSelectGroup = document.getElementById('clubSelectGroup');
+        const newClubGroup = document.getElementById('newClubGroup');
+        const clubSelect = document.getElementById('clubSelect');
+        
+        if (role === 'club_president') {
+            clubSelectGroup.style.display = 'block';
+            newClubGroup.style.display = 'block';
+            clubSelect.required = false; // Optional, so they can write new club
+        } else {
+            clubSelectGroup.style.display = 'none';
+            newClubGroup.style.display = 'none';
+            clubSelect.required = false;
+        }
+    }
+</script>
+{% endblock %}

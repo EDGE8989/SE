@@ -1,0 +1,94 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="stats-row">
+    {% for key, val in stats.items() %}
+    <div class="stat-card-admin">
+        <div class="stat-card-value">{{ val }}</div>
+        <div class="stat-card-label">{{ key | replace('_', ' ') | title }}</div>
+    </div>
+    {% else %}
+    <div class="empty-state col-span-full">
+        <i class="fa-solid fa-chart-line"></i>
+        <p>No dashboard statistics are available for this account yet.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="two-column-grid">
+    <div class="admin-table-card">
+        <div class="admin-table-header">
+            <div>
+                <h3 class="admin-table-title">Recent Activity</h3>
+                <p class="text-sm m-0">Latest system changes and content actions.</p>
+            </div>
+        </div>
+        <div class="p-3">
+            <ul class="activity-feed">
+                {% for activity in recent_activity %}
+                <li class="activity-item">
+                    <div class="activity-content">
+                        <div class="activity-text">{{ activity.action }}</div>
+                        <div class="activity-time">{{ activity.timestamp.strftime('%d %b %Y, %I:%M %p') }}</div>
+                    </div>
+                </li>
+                {% else %}
+                <li class="empty-state">
+                    <i class="fa-regular fa-clock"></i>
+                    <p>No recent activity yet.</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <aside class="admin-table-card">
+        <div class="admin-table-header">
+            <div>
+                <h3 class="admin-table-title">Common Workflows</h3>
+                <p class="text-sm m-0">Jump straight into frequent admin tasks.</p>
+            </div>
+        </div>
+        <div class="p-3 resource-list">
+            {% if current_user.is_super_admin %}
+            <a href="{{ url_for('admin_access_requests.index') }}" class="resource-row text-decoration-none">
+                <div class="resource-icon"><i class="fa-solid fa-user-shield"></i></div>
+                <div>
+                    <h4 class="text-lg mb-1">Pending Access Requests</h4>
+                    <p class="text-sm">Review applications from new club presidents and admins.</p>
+                </div>
+            </a>
+            {% else %}
+            <a href="{{ url_for('registrations.index') }}" class="resource-row text-decoration-none">
+                <div class="resource-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                <div>
+                    <h4 class="text-lg mb-1">Student Registrations</h4>
+                    <p class="text-sm">View student registrations for events and workshops.</p>
+                </div>
+            </a>
+            {% endif %}
+            <a href="{{ url_for('events.index') }}" class="resource-row text-decoration-none">
+                <div class="resource-icon"><i class="fa-solid fa-calendar-plus"></i></div>
+                <div>
+                    <h4 class="text-lg mb-1">Manage Events</h4>
+                    <p class="text-sm">Create, review, and organize campus events.</p>
+                </div>
+            </a>
+            <a href="{{ url_for('notices.index') }}" class="resource-row text-decoration-none">
+                <div class="resource-icon"><i class="fa-solid fa-bullhorn"></i></div>
+                <div>
+                    <h4 class="text-lg mb-1">Publish Notices</h4>
+                    <p class="text-sm">Keep students informed with official updates.</p>
+                </div>
+            </a>
+            <a href="{{ url_for('public.home') }}" class="resource-row text-decoration-none">
+                <div class="resource-icon"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+                <div>
+                    <h4 class="text-lg mb-1">View Public Portal</h4>
+                    <p class="text-sm">Check what students currently see.</p>
+                </div>
+            </a>
+        </div>
+    </aside>
+</div>
+{% endblock %}

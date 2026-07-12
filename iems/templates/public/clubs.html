@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Clubs & Societies{% endblock %}
+
+{% block content %}
+<section class="section bg-white">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-kicker">Communities</div>
+            <h2>Clubs & Societies</h2>
+            <p>Discover and join various student-run organizations on campus.</p>
+        </div>
+        
+        <div class="mb-5 d-flex gap-2 justify-center flex-wrap">
+            <a href="{{ url_for('public.clubs') }}" class="btn {% if not selected_category %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">All Clubs</a>
+            {% for cat in categories %}
+            <a href="{{ url_for('public.clubs', category=cat) }}" class="btn {% if selected_category == cat %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">{{ cat | title }}</a>
+            {% endfor %}
+        </div>
+        
+        <div class="cards-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+            {% for club in clubs %}
+            <article class="card card-hover p-0" style="overflow: hidden; display: flex; flex-direction: column; height: 100%;">
+                <div style="height: 8px; background: linear-gradient(90deg, var(--primary), var(--accent-blue));"></div>
+                <div style="padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1;">
+                    <div class="d-flex align-center gap-3 mb-3">
+                        <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, var(--primary), var(--accent-blue)); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; flex-shrink: 0;">{{ club.name[0] }}</div>
+                        <div>
+                            <h4 class="m-0 mb-1" style="font-size: 1.15rem; font-weight: 700; color: var(--primary);">{{ club.name }}</h4>
+                            <span class="badge badge-secondary text-xs" style="text-transform: uppercase; font-weight: 600;">{{ club.category | title }}</span>
+                        </div>
+                    </div>
+                    
+                    <p class="text-sm text-secondary mb-4" style="line-height: 1.6; flex-grow: 1;">{{ club.description[:140] }}{% if club.description|length > 140 %}...{% endif %}</p>
+                    
+                    <div class="d-flex gap-3 mb-4 pb-3 border-bottom" style="flex-wrap: wrap;">
+                        {% if club.faculty %}
+                        <div class="text-xs text-muted" style="display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-chalkboard-user" style="color: var(--accent-blue);"></i> 
+                            <span>Advisor: <strong>{{ club.faculty }}</strong></span>
+                        </div>
+                        {% endif %}
+                        {% if club.president %}
+                        <div class="text-xs text-muted" style="display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-user-tie" style="color: var(--accent-blue);"></i> 
+                            <span>President: <strong>{{ club.president }}</strong></span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex gap-2 mt-auto">
+                        <a href="{{ url_for('public.club_detail', club_id=club.id) }}" class="btn btn-primary btn-sm" style="flex: 1;"><i class="fa-solid fa-arrow-right-to-bracket"></i> Explore Club</a>
+                        {% if club.email %}
+                        <a href="mailto:{{ club.email }}" class="btn btn-secondary btn-sm" title="Email Club" style="padding: 0 12px; display: inline-flex; align-items: center; justify-content: center;"><i class="fa-solid fa-envelope"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+            {% else %}
+            <div class="col-span-full text-center py-5">
+                <p class="text-muted">No clubs found in this category.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

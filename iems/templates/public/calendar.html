@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Academic Calendar{% endblock %}
+
+{% block content %}
+<section class="section bg-white">
+    <div class="container" style="max-width: 1000px;">
+        <div class="section-header">
+            <h2>Academic Calendar</h2>
+            <p>Important dates for exams, holidays, events, and semester schedules.</p>
+        </div>
+        
+        <div class="card p-4 p-md-5 mb-5">
+            <div class="d-flex justify-between align-center mb-4">
+                <a href="{{ url_for('public.calendar', month=(month-1 if month>1 else 12), year=(year if month>1 else year-1)) }}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-chevron-left"></i> Prev Month</a>
+                
+                <h3 class="m-0 text-center" style="min-width: 200px;">
+                    {% set months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] %}
+                    {{ months[month-1] }} {{ year }}
+                </h3>
+                
+                <a href="{{ url_for('public.calendar', month=(month+1 if month<12 else 1), year=(year if month<12 else year+1)) }}" class="btn btn-secondary btn-sm">Next Month <i class="fa-solid fa-chevron-right"></i></a>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 20px;">
+                <div class="text-center fw-bold text-muted text-uppercase text-xs pb-2 border-bottom">Mon</div>
+                <div class="text-center fw-bold text-muted text-uppercase text-xs pb-2 border-bottom">Tue</div>
+                <div class="text-center fw-bold text-muted text-uppercase text-xs pb-2 border-bottom">Wed</div>
+                <div class="text-center fw-bold text-muted text-uppercase text-xs pb-2 border-bottom">Thu</div>
+                <div class="text-center fw-bold text-muted text-uppercase text-xs pb-2 border-bottom">Fri</div>
+                <div class="text-center fw-bold text-muted text-uppercase text-xs pb-2 border-bottom">Sat</div>
+                <div class="text-center fw-bold text-muted text-uppercase text-xs pb-2 border-bottom">Sun</div>
+                
+                {# Simple calendar representation - in a real app, you'd use a macro or pass a matrix of days #}
+                <!-- Calendar grid would go here. For simplicity in this demo template, we'll list the events below. -->
+            </div>
+            
+            <h4 class="mb-3 mt-4 border-bottom pb-2">Events This Month</h4>
+            <div class="d-flex flex-col gap-2">
+                {% for event in events %}
+                <div class="d-flex align-center gap-3 p-3 rounded" style="background-color: {{ event.category_color }}15; border-left: 4px solid {{ event.category_color }};">
+                    <div style="min-width: 100px; font-weight: 700; color: {{ event.category_color }};">
+                        {{ event.event_date.strftime('%d %b') }}
+                        {% if event.end_date %}
+                        - {{ event.end_date.strftime('%d %b') }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="fw-bold">{{ event.title }}</div>
+                        {% if event.description %}
+                        <div class="text-sm text-secondary mt-1">{{ event.description }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="ml-auto badge" style="background-color: {{ event.category_color }}; color: white;">
+                        {{ event.category | title }}
+                    </div>
+                </div>
+                {% else %}
+                <div class="p-4 text-center text-muted bg-light rounded">No calendar events scheduled for this month.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

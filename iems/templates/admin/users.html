@@ -1,0 +1,131 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<div class="admin-table-card">
+    <div class="admin-table-header">
+        <h3 class="admin-table-title">System Users</h3>
+        <div class="admin-table-actions">
+            {% if current_user.is_super_admin %}
+            <button class="btn btn-primary btn-sm" onclick="document.getElementById('addUserModal').style.display='flex'"><i class="fa-solid fa-user-plus"></i> Add User</button>
+            {% endif %}
+        </div>
+    </div>
+    <div class="table-responsive p-3">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name & Email</th>
+                    <th>Role</th>
+                    <th>Club Assignment</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>
+                        <div class="fw-medium">{{ user.name }}</div>
+                        <div class="text-sm text-muted">{{ user.email }}</div>
+                    </td>
+                    <td><span class="badge badge-secondary">{{ user.role_display }}</span></td>
+                    <td>{{ user.club.name if user.club else '-' }}</td>
+                    <td>
+                        {% if user.status == 'active' %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-danger">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if current_user.is_super_admin and user.id != current_user.id %}
+                        <form method="POST" action="{{ url_for('users.toggle_status', id=user.id) }}" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm {% if user.status == 'active' %}btn-outline{% else %}btn-success{% endif %}">
+                                {% if user.status == 'active' %}Deactivate{% else %}Activate{% endif %}
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="text-muted text-sm">N/A</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">No users found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if current_user.is_super_admin %}
+<!-- Add User Modal -->
+<div id="addUserModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 500px;">
+        <div class="d-flex justify-between align-center mb-4">
+            <h3 class="m-0">Create User Account</h3>
+            <button onclick="document.getElementById('addUserModal').style.display='none'" class="btn btn-sm btn-outline" style="border: none;"><i class="fa-solid fa-xmark" style="font-size: 1.5rem;"></i></button>
+        </div>
+        
+        <form method="POST" action="{{ url_for('users.add') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input type="text" name="name" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Email Address *</label>
+                <input type="email" name="email" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Temporary Password *</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Role *</label>
+                <select name="role" class="form-control" id="roleSelect" required onchange="toggleClubSelect()">
+                    <option value="club_president">Club President</option>
+                    <option value="college_admin">College Admin</option>
+                    <option value="super_admin">Super Admin</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="clubSelectGroup">
+                <label class="form-label">Assign to Club *</label>
+                <select name="club_id" class="form-control">
+                    <option value="">-- Select Club --</option>
+                    {% for club in clubs %}
+                    <option value="{{ club.id }}">{{ club.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <script>
+                function toggleClubSelect() {
+                    const role = document.getElementById('roleSelect').value;
+                    const clubGroup = document.getElementById('clubSelectGroup');
+                    if (role === 'club_president') {
+                        clubGroup.style.display = 'block';
+                    } else {
+                        clubGroup.style.display = 'none';
+                    }
+                }
+            </script>
+            
+            <div class="d-flex justify-end gap-2 mt-4 pt-3 border-top">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('addUserModal').style.display='none'">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create User</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

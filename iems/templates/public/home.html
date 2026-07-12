@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="hero-content">
+            <div class="hero-badge"><i class="fa-solid fa-layer-group"></i> Campus operations, organized</div>
+            <h1>Integrated Engineering <span>Management System</span></h1>
+            <p class="hero-subtitle">One professional hub for events, notices, clubs, workshops, scholarships, career opportunities, and the academic calendar.</p>
+            <div class="hero-actions">
+                <a href="{{ url_for('public.events') }}" class="btn btn-primary btn-lg"><i class="fa-solid fa-calendar-check"></i> Explore Events</a>
+                <a href="{{ url_for('public.notices') }}" class="btn btn-secondary btn-lg"><i class="fa-solid fa-bullhorn"></i> View Notices</a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-number">{{ stats.events }}</div>
+                    <div class="hero-stat-label">Approved Events</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-number">{{ stats.clubs }}</div>
+                    <div class="hero-stat-label">Active Clubs</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-number">{{ stats.students }}+</div>
+                    <div class="hero-stat-label">Students</div>
+                </div>
+            </div>
+        </div>
+
+        <aside class="hero-panel">
+            <h3>Quick Actions</h3>
+            <div class="quick-link-grid">
+                <a class="quick-link" href="{{ url_for('public.workshops') }}"><i class="fa-solid fa-chalkboard-user"></i> Workshops</a>
+                <a class="quick-link" href="{{ url_for('public.clubs') }}"><i class="fa-solid fa-users"></i> Clubs</a>
+                <a class="quick-link" href="{{ url_for('public.opportunities') }}"><i class="fa-solid fa-briefcase"></i> Careers</a>
+                <a class="quick-link" href="{{ url_for('public.calendar') }}"><i class="fa-solid fa-calendar-days"></i> Calendar</a>
+                <a class="quick-link" href="{{ url_for('public.scholarships') }}"><i class="fa-solid fa-award"></i> Aid</a>
+                <a class="quick-link" href="{{ url_for('public.updates') }}"><i class="fa-solid fa-clock-rotate-left"></i> Updates</a>
+            </div>
+        </aside>
+    </div>
+</section>
+
+<section class="feature-band">
+    <div class="container feature-grid">
+        <div class="card feature-card">
+            <i class="fa-solid fa-calendar-check"></i>
+            <h3 class="text-lg mb-1">Event Discovery</h3>
+            <p class="text-sm">Find upcoming campus programs with club, venue, date, and registration details.</p>
+        </div>
+        <div class="card feature-card">
+            <i class="fa-solid fa-clipboard-check"></i>
+            <h3 class="text-lg mb-1">Approval Workflow</h3>
+            <p class="text-sm">Club submissions move through admin review before students see them.</p>
+        </div>
+        <div class="card feature-card">
+            <i class="fa-solid fa-bullhorn"></i>
+            <h3 class="text-lg mb-1">Notice Board</h3>
+            <p class="text-sm">Academic, recruitment, club, and general notices stay in one searchable place.</p>
+        </div>
+        <div class="card feature-card">
+            <i class="fa-solid fa-briefcase"></i>
+            <h3 class="text-lg mb-1">Career Readiness</h3>
+            <p class="text-sm">Internships, jobs, fellowships, and competitions are organized for quick action.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-kicker">Happening Next</div>
+            <h2>Upcoming Events</h2>
+            <p>See what is scheduled across campus and register before seats fill up.</p>
+        </div>
+
+        <div class="cards-grid">
+            {% for event in upcoming_events[:3] %}
+            <article class="event-card card card-hover p-0">
+                <div style="position: relative;">
+                    <img src="{{ event.image_url }}" alt="{{ event.title }}">
+                    <div class="date-badge"><span>{{ event.date.strftime('%b') }}</span>{{ event.date.strftime('%d') }}</div>
+                </div>
+                <div class="p-3">
+                    {% if event.club %}<div class="badge badge-secondary mb-2">{{ event.club.name }}</div>{% endif %}
+                    <h3 class="text-lg mb-2">{{ event.title }}</h3>
+                    <p class="text-sm mb-1"><i class="fa-regular fa-clock"></i> {{ event.time.strftime('%I:%M %p') if event.time else 'TBD' }}</p>
+                    <p class="text-sm mb-3"><i class="fa-solid fa-location-dot"></i> {{ event.venue }}</p>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('public.event_detail', event_id=event.id) }}" class="btn btn-outline btn-sm" style="flex: 1;">View Details</a>
+                        <a href="{{ url_for('registration.register', item_type='event', item_id=event.id) }}" class="btn btn-primary btn-sm" style="flex: 1;">Register</a>
+                    </div>
+                </div>
+            </article>
+            {% else %}
+            <div class="empty-state col-span-full">
+                <i class="fa-regular fa-calendar"></i>
+                <p>No upcoming events are published yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section bg-white">
+    <div class="container two-column-grid">
+        <div>
+            <div class="section-header kicker-left">
+                <div class="section-kicker">Announcements</div>
+                <h2>Latest Notices</h2>
+                <p>Important updates from administration and student organizations.</p>
+            </div>
+            <div class="notice-list">
+                {% for notice in latest_notices %}
+                <article class="notice-row">
+                    <div class="notice-icon"><i class="fa-solid fa-bullhorn"></i></div>
+                    <div>
+                        <h3 class="text-lg mb-1">{{ notice.title }}</h3>
+                        <p class="text-sm">Posted {{ notice.created_at.strftime('%d %b %Y') }}{% if notice.club %} by {{ notice.club.name }}{% endif %}</p>
+                    </div>
+                    <a href="{{ url_for('public.notices') }}" class="btn btn-outline btn-sm">Open</a>
+                </article>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fa-regular fa-bell"></i>
+                    <p>No new notices.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <aside>
+            <div class="section-header kicker-left">
+                <div class="section-kicker">Student Resources</div>
+                <h2>Act Before Deadlines</h2>
+            </div>
+            <div class="resource-list">
+                {% for scholarship in scholarships %}
+                <article class="resource-row">
+                    <div class="resource-icon"><i class="fa-solid fa-award"></i></div>
+                    <div>
+                        <h3 class="text-lg mb-1">{{ scholarship.title }}</h3>
+                        <p class="text-sm">{{ scholarship.amount }} · Deadline {{ scholarship.deadline.strftime('%d %b') if scholarship.deadline else 'Open' }}</p>
+                    </div>
+                </article>
+                {% endfor %}
+                {% for opportunity in opportunities[:2] %}
+                <article class="resource-row">
+                    <div class="resource-icon"><i class="fa-solid fa-briefcase"></i></div>
+                    <div>
+                        <h3 class="text-lg mb-1">{{ opportunity.title }}</h3>
+                        <p class="text-sm">{{ opportunity.company }} · {{ opportunity.type_display }}</p>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </aside>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-kicker">Communities</div>
+            <h2>Featured Clubs</h2>
+            <p>Explore active student groups and follow their events, notices, and programs.</p>
+        </div>
+        <div class="cards-grid">
+            {% for club in featured_clubs[:3] %}
+            <article class="card card-hover p-0" style="overflow: hidden; display: flex; flex-direction: column; height: 100%;">
+                <div style="height: 6px; background: linear-gradient(90deg, var(--primary), var(--accent-blue));"></div>
+                <div class="p-4" style="display: flex; flex-direction: column; flex-grow: 1;">
+                    <div class="d-flex align-center gap-3 mb-3">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), var(--accent-blue)); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 800; flex-shrink: 0;">{{ club.name[0] }}</div>
+                        <div>
+                            <h3 class="text-lg m-0 mb-1" style="font-weight: 700; color: var(--primary);">{{ club.name }}</h3>
+                            <span class="badge badge-secondary text-xs" style="text-transform: uppercase;">{{ club.category | title }}</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-secondary mb-4" style="line-height: 1.6; flex-grow: 1;">{{ club.description[:120] }}{% if club.description|length > 120 %}...{% endif %}</p>
+                    <a href="{{ url_for('public.club_detail', club_id=club.id) }}" class="btn btn-outline btn-sm mt-auto" style="width: 100%;">View Club <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </article>
+            {% else %}
+            <div class="empty-state col-span-full">
+                <i class="fa-solid fa-users"></i>
+                <p>No featured clubs are available yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

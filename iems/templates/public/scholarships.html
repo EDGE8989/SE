@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Scholarships{% endblock %}
+
+{% block content %}
+<section class="section bg-white">
+    <div class="container">
+        <div class="section-header">
+            <h2>Scholarships & Financial Aid</h2>
+            <p>Explore available scholarships, grants, and financial assistance programs.</p>
+        </div>
+        
+        <div class="mb-5">
+            <h3 class="mb-4 d-flex align-center gap-2"><i class="fa-solid fa-star text-warning"></i> Active Scholarships</h3>
+            <div class="cards-grid" style="grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));">
+                {% for scholarship in active_scholarships %}
+                <div class="card card-hover" style="border-left: 4px solid var(--success);">
+                    <div class="d-flex justify-between align-start mb-2">
+                        <h4 class="m-0" style="color: var(--primary);">{{ scholarship.title }}</h4>
+                        <div class="badge badge-success">Active</div>
+                    </div>
+                    <div class="text-xl fw-bold text-success mb-3">{{ scholarship.amount }}</div>
+                    
+                    <div class="mb-3">
+                        <div class="text-xs text-muted text-uppercase fw-bold mb-1">Description</div>
+                        <p class="text-sm text-secondary m-0">{{ scholarship.description }}</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="text-xs text-muted text-uppercase fw-bold mb-1">Eligibility</div>
+                        <p class="text-sm text-secondary m-0">{{ scholarship.eligibility }}</p>
+                    </div>
+                    
+                    <div class="d-flex justify-between align-center border-top pt-3 mt-auto">
+                        <div class="text-sm fw-medium text-danger">
+                            <i class="fa-regular fa-calendar-xmark"></i> Deadline: {{ scholarship.deadline.strftime('%d %b %Y') if scholarship.deadline else 'Ongoing' }}
+                        </div>
+                        <a href="{{ url_for('registration.register', item_type='scholarship', item_id=scholarship.id) }}" class="btn btn-primary btn-sm">Apply Now</a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-span-full card p-5 text-center bg-light">
+                    <p class="text-muted m-0">No active scholarships at the moment. Please check back later.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        {% if past_scholarships %}
+        <div class="mt-5">
+            <h3 class="mb-4 text-muted">Past Scholarships</h3>
+            <div class="card p-0">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Scholarship Name</th>
+                            <th>Amount</th>
+                            <th>Deadline Passed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for scholarship in past_scholarships %}
+                        <tr>
+                            <td class="fw-medium">{{ scholarship.title }}</td>
+                            <td>{{ scholarship.amount }}</td>
+                            <td class="text-muted">{{ scholarship.deadline.strftime('%d %b %Y') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

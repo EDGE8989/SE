@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Events{% endblock %}
+
+{% block content %}
+<section class="section bg-white">
+    <div class="container">
+        <div class="section-header">
+            <h2>Campus Events</h2>
+            <p>Stay engaged with all the technical, cultural, and sports events happening around campus.</p>
+        </div>
+        
+        <form class="d-flex gap-2 mb-4 justify-center" action="{{ url_for('public.events') }}" method="GET">
+            <input type="text" name="q" class="form-control" placeholder="Search events..." value="{{ search }}" style="max-width: 300px;">
+            <select name="club" class="form-control" style="max-width: 200px;">
+                <option value="0">All Clubs</option>
+                {% for c in clubs %}
+                <option value="{{ c.id }}" {% if club_filter == c.id %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-search"></i> Search</button>
+        </form>
+        
+        <div class="cards-grid mb-4">
+            {% for event in pagination.items %}
+            <div class="event-card card card-hover" style="padding: 0; overflow: hidden;">
+                <div style="position: relative;">
+                    <img src="{{ event.image_url }}" alt="{{ event.title }}">
+                    <div class="date-badge" style="position: absolute; top: 12px; left: 12px; background: var(--primary); color: white; padding: 6px 10px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; text-align: center;">
+                        <div style="font-size: 0.7rem; text-transform: uppercase;">{{ event.date.strftime('%b') }}</div>
+                        <div style="font-size: 1.2rem;">{{ event.date.strftime('%d') }}</div>
+                    </div>
+                </div>
+                <div class="p-3">
+                    {% if event.club %}
+                    <div class="badge badge-secondary mb-2">{{ event.club.name }}</div>
+                    {% endif %}
+                    <h4 class="mb-2"><a href="{{ url_for('public.event_detail', event_id=event.id) }}" style="text-decoration: none; color: inherit;">{{ event.title }}</a></h4>
+                    <p class="text-sm text-muted mb-2"><i class="fa-regular fa-clock"></i> {{ event.time.strftime('%I:%M %p') if event.time else 'TBD' }}</p>
+                    <p class="text-sm text-muted mb-3"><i class="fa-solid fa-location-dot"></i> {{ event.venue }}</p>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('public.event_detail', event_id=event.id) }}" class="btn btn-outline btn-sm" style="flex: 1;">View Details</a>
+                        <a href="{{ url_for('registration.register', item_type='event', item_id=event.id) }}" class="btn btn-primary btn-sm" style="flex: 1;">Register</a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-span-3 text-center py-5">
+                <p class="text-muted">No events found matching your criteria.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination Placeholder -->
+        <div class="d-flex justify-center gap-1 mt-4">
+            {% if pagination.has_prev %}
+            <a href="{{ url_for('public.events', page=pagination.prev_num, q=search, club=club_filter) }}" class="btn btn-secondary btn-sm">&laquo; Prev</a>
+            {% endif %}
+            
+            {% if pagination.has_next %}
+            <a href="{{ url_for('public.events', page=pagination.next_num, q=search, club=club_filter) }}" class="btn btn-secondary btn-sm">Next &raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

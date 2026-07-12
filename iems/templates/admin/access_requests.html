@@ -1,0 +1,139 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Access Requests{% endblock %}
+
+{% block content %}
+<div class="admin-table-card">
+    <div class="admin-table-header">
+        <h3 class="admin-table-title">Authority Access Requests</h3>
+    </div>
+    
+    <div class="p-3 d-flex gap-2 border-bottom flex-wrap">
+        <a href="{{ url_for('admin_access_requests.index', status='pending') }}" class="btn {% if status_filter == 'pending' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">Pending ({{ counts.pending }})</a>
+        <a href="{{ url_for('admin_access_requests.index', status='approved') }}" class="btn {% if status_filter == 'approved' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">Approved ({{ counts.approved }})</a>
+        <a href="{{ url_for('admin_access_requests.index', status='rejected') }}" class="btn {% if status_filter == 'rejected' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">Rejected ({{ counts.rejected }})</a>
+    </div>
+    
+    <div class="table-responsive p-3">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Requester</th>
+                    <th>Contact Info</th>
+                    <th>Requested Role</th>
+                    <th>Details / Designation</th>
+                    <th>Reason / Justification</th>
+                    {% if status_filter == 'pending' %}
+                    <th>Actions</th>
+                    {% else %}
+                    <th>Review Log</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                <tr>
+                    <td class="text-muted text-sm">{{ req.created_at.strftime('%d %b %Y') }}</td>
+                    <td class="fw-medium">{{ req.name }}</td>
+                    <td class="text-sm">
+                        <div><a href="mailto:{{ req.email }}">{{ req.email }}</a></div>
+                        <div class="text-muted">{{ req.phone or '-' }}</div>
+                    </td>
+                    <td>
+                        <span class="badge {% if req.requested_role == 'college_admin' %}badge-primary{% else %}badge-secondary{% endif %}">{{ req.role_display }}</span>
+                    </td>
+                    <td class="text-sm">
+                        {% if req.requested_role == 'club_president' %}
+                        <div class="fw-semibold">Club: {{ req.club.name if req.club else req.club_name or 'Unspecified' }}</div>
+                        {% endif %}
+                        <div class="text-xs text-muted">Designation: {{ req.designation or '-' }}</div>
+                    </td>
+                    <td class="text-sm" style="max-width: 250px; white-space: pre-wrap;">{{ req.reason }}</td>
+                    
+                    {% if status_filter == 'pending' %}
+                    <td>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-success" onclick="openReviewModal({{ req.id }}, '{{ req.name | replace("'", "\\'") }}', 'approve')"><i class="fa-solid fa-check"></i> Approve</button>
+                            <button class="btn btn-sm btn-outline text-danger" onclick="openReviewModal({{ req.id }}, '{{ req.name | replace("'", "\\'") }}', 'reject')"><i class="fa-solid fa-xmark"></i> Reject</button>
+                        </div>
+                    </td>
+                    {% else %}
+                    <td class="text-sm">
+                        <div class="fw-medium">Reviewed by: {{ req.reviewer.name if req.reviewer else 'Admin' }}</div>
+                        <div class="text-xs text-muted">Note: {{ req.review_note or '-' }}</div>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">No access requests found in this section.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Review Modal -->
+<div id="reviewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 500px;">
+        <div class="d-flex justify-between align-center mb-4">
+            <h3 class="m-0" id="modalTitle">Review Request</h3>
+            <button onclick="closeReviewModal()" class="btn btn-sm btn-outline" style="border: none;"><i class="fa-solid fa-xmark" style="font-size: 1.5rem;"></i></button>
+        </div>
+        
+        <form method="POST" id="reviewForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="mb-3">
+                <p id="modalDescription">Reviewing request from...</p>
+            </div>
+
+            <div class="form-group mb-4">
+                <label class="form-label fw-semibold">Review Notes / Admin Message</label>
+                <textarea name="review_note" class="form-control" rows="3" placeholder="Enter instructions or remarks (e.g. key details for approval / rejection reason)"></textarea>
+                <div class="text-xs text-muted mt-1" id="modalHelpText"></div>
+            </div>
+            
+            <div class="d-flex justify-end gap-2 mt-4 pt-3 border-top">
+                <button type="button" class="btn btn-secondary" onclick="closeReviewModal()">Cancel</button>
+                <button type="submit" class="btn" id="modalSubmitBtn">Submit Decision</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openReviewModal(reqId, requesterName, action) {
+        const modal = document.getElementById('reviewModal');
+        const form = document.getElementById('reviewForm');
+        const title = document.getElementById('modalTitle');
+        const desc = document.getElementById('modalDescription');
+        const submitBtn = document.getElementById('modalSubmitBtn');
+        const helpText = document.getElementById('modalHelpText');
+
+        desc.innerHTML = `Are you sure you want to <strong>${action}</strong> the access request from <strong>${requesterName}</strong>?`;
+        
+        if (action === 'approve') {
+            title.textContent = 'Approve Access Request';
+            form.action = `/admin/access-requests/${reqId}/approve`;
+            submitBtn.textContent = 'Approve & Create Account';
+            submitBtn.className = 'btn btn-success';
+            helpText.textContent = 'On approval, a user account will be created automatically and a random password generated.';
+        } else {
+            title.textContent = 'Reject Access Request';
+            form.action = `/admin/access-requests/${reqId}/reject`;
+            submitBtn.textContent = 'Reject Request';
+            submitBtn.className = 'btn btn-danger';
+            helpText.textContent = 'Please enter a brief rejection reason so the applicant is informed.';
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    function closeReviewModal() {
+        document.getElementById('reviewModal').style.display = 'none';
+    }
+</script>
+{% endblock %}

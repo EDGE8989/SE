@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}{{ club.name }}{% endblock %}
+
+{% block content %}
+<section class="section bg-white">
+    <div class="container" style="max-width: 1000px;">
+        <!-- Club Header -->
+        <div class="card p-0 mb-5" style="overflow: hidden; border: none; box-shadow: var(--shadow-md);">
+            <div style="height: 140px; background: linear-gradient(135deg, var(--primary), var(--accent-blue)); position: relative;"></div>
+            <div style="padding: 0 2rem 2rem; margin-top: -48px; position: relative; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+                <div class="d-flex align-center gap-4" style="flex-wrap: wrap;">
+                    <div style="width: 110px; height: 110px; border-radius: 24px; background: #fff; border: 4px solid #fff; box-shadow: var(--shadow-md); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 800; color: var(--primary); flex-shrink: 0;">
+                        {{ club.name[0] }}
+                    </div>
+                    <div style="padding-top: 54px;">
+                        <span class="badge badge-primary mb-1" style="text-transform: uppercase;">{{ club.category | title }}</span>
+                        <h1 style="font-size: 2.2rem; margin-bottom: 6px; font-weight: 800; color: var(--primary);">{{ club.name }}</h1>
+                        {% if club.email %}
+                        <p class="text-sm text-secondary m-0" style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-envelope" style="color: var(--accent-blue);"></i> <span>{{ club.email }}</span>
+                            {% if club.phone %}
+                            <span class="text-muted">&middot;</span>
+                            <i class="fa-solid fa-phone" style="color: var(--accent-blue);"></i> <span>{{ club.phone }}</span>
+                            {% endif %}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Club Info Grid -->
+        <div class="d-grid gap-4" style="grid-template-columns: 1.8fr 1.2fr;">
+            <!-- Main Content -->
+            <div>
+                <!-- About -->
+                <div class="card mb-4" style="padding: 2rem;">
+                    <h3 class="mb-3" style="font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-info-circle" style="color: var(--accent-blue);"></i> 
+                        <span>About the Club</span>
+                    </h3>
+                    <p class="text-secondary" style="line-height: 1.8; font-size: 0.98rem; white-space: pre-wrap;">{{ club.description }}</p>
+                </div>
+                
+                <!-- Events -->
+                <div class="card" style="padding: 2rem;">
+                    <h3 class="mb-4" style="font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-calendar-alt" style="color: var(--accent-blue);"></i> 
+                        <span>Recent & Upcoming Events</span>
+                    </h3>
+                    {% if events %}
+                    <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
+                        {% for event in events %}
+                        <a href="{{ url_for('public.event_detail', event_id=event.id) }}" class="card card-hover p-0" style="overflow: hidden; text-decoration: none; color: inherit; display: flex; flex-direction: column; height: 100%;">
+                            <img src="{{ event.image_url }}" alt="{{ event.title }}" style="width: 100%; height: 130px; object-fit: cover; background: var(--surface-muted);">
+                            <div style="padding: 1rem; flex-grow: 1; display: flex; flex-direction: column;">
+                                <div class="text-xs text-muted mb-2"><i class="fa-regular fa-calendar"></i> {{ event.date.strftime('%d %b %Y') }}</div>
+                                <h5 class="m-0 text-sm fw-bold mb-2" style="color: var(--primary); flex-grow: 1;">{{ event.title }}</h5>
+                                <p class="text-xs text-secondary m-0" style="display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-location-dot" style="color: var(--accent-blue);"></i> <span>{{ event.venue }}</span></p>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-sm m-0">No recent events from this club.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <aside>
+                <!-- Leadership -->
+                <div class="card mb-4" style="padding: 1.75rem;">
+                    <h4 class="mb-4" style="font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-user-shield" style="color: var(--accent-blue);"></i> 
+                        <span>Club Officers</span>
+                    </h4>
+                    {% if club.president %}
+                    <div class="d-flex align-center gap-3 mb-4">
+                        <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent-blue)); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0;">{{ club.president[0] }}</div>
+                        <div>
+                            <div class="fw-bold text-sm" style="color: var(--primary);">{{ club.president }}</div>
+                            <div class="text-xs text-muted">Club President</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if club.faculty %}
+                    <div class="d-flex align-center gap-3">
+                        <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #059669, #10B981); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0;">{{ club.faculty[0] }}</div>
+                        <div>
+                            <div class="fw-bold text-sm" style="color: var(--primary);">{{ club.faculty }}</div>
+                            <div class="text-xs text-muted">Faculty Coordinator</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Notices -->
+                <div class="card" style="padding: 1.75rem;">
+                    <h4 class="mb-4" style="font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-bullhorn" style="color: var(--accent-blue);"></i> 
+                        <span>Club Notices</span>
+                    </h4>
+                    {% for notice in notices %}
+                    <div class="{% if not loop.last %}mb-4 pb-3 border-bottom{% endif %}">
+                        <h6 class="m-0 mb-1 fw-bold" style="font-size: 0.95rem; color: var(--primary);">{{ notice.title }}</h6>
+                        <p class="text-xs text-muted mb-2">{{ notice.created_at.strftime('%d %b %Y') }}</p>
+                        {% if notice.attachment %}
+                        <a href="{{ notice.attachment_url }}" target="_blank" class="text-xs fw-semibold" style="color: var(--accent-blue); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="fa-solid fa-paperclip"></i> <span>Download Attachment</span></a>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-sm m-0">No active notices from this club.</p>
+                    {% endfor %}
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+{% endblock %}

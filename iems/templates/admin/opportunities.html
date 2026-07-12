@@ -1,0 +1,122 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Manage Opportunities{% endblock %}
+
+{% block content %}
+<div class="admin-table-card">
+    <div class="admin-table-header">
+        <h3 class="admin-table-title">Opportunities Management</h3>
+        <div class="admin-table-actions">
+            <button class="btn btn-primary btn-sm" onclick="document.getElementById('addOpportunityModal').style.display='flex'"><i class="fa-solid fa-plus"></i> Add Opportunity</button>
+        </div>
+    </div>
+    <div class="table-responsive p-3">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Company</th>
+                    <th>Type</th>
+                    <th>Deadline</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for opp in opportunities %}
+                <tr>
+                    <td class="fw-medium">{{ opp.title }}</td>
+                    <td>{{ opp.company }}</td>
+                    <td><span class="badge badge-secondary">{{ opp.type_display }}</span></td>
+                    <td>{{ opp.deadline.strftime('%d %b %Y') if opp.deadline else 'Open' }}</td>
+                    <td>
+                        {% if opp.is_active %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-danger">Closed</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="POST" action="{{ url_for('opportunities.delete', id=opp.id) }}" style="display:inline;" onsubmit="return confirm('Delete this opportunity?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-outline text-danger"><i class="fa-solid fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">No opportunities found. Create one to get started.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Opportunity Modal -->
+<div id="addOpportunityModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+        <div class="d-flex justify-between align-center mb-4">
+            <h3 class="m-0">Create New Opportunity</h3>
+            <button onclick="document.getElementById('addOpportunityModal').style.display='none'" class="btn btn-sm btn-outline" style="border: none;"><i class="fa-solid fa-xmark" style="font-size: 1.5rem;"></i></button>
+        </div>
+        
+        <form method="POST" action="{{ url_for('opportunities.add') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="form-group">
+                <label class="form-label">Job / Role Title *</label>
+                <input type="text" name="title" class="form-control" required>
+            </div>
+            
+            <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
+                <div class="form-group">
+                    <label class="form-label">Company / Organization *</label>
+                    <input type="text" name="company" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Opportunity Type *</label>
+                    <select name="type" class="form-control" required>
+                        <option value="internship">Internship</option>
+                        <option value="job">Job</option>
+                        <option value="fellowship">Fellowship</option>
+                        <option value="competition">Competition</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
+                <div class="form-group">
+                    <label class="form-label">Location (e.g. Remote, Bangalore)</label>
+                    <input type="text" name="location" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Stipend / Salary</label>
+                    <input type="text" name="stipend" class="form-control">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Description *</label>
+                <textarea name="description" class="form-control" rows="4" required></textarea>
+            </div>
+            
+            <div class="d-grid gap-3" style="grid-template-columns: 1fr 1fr;">
+                <div class="form-group">
+                    <label class="form-label">Application Deadline</label>
+                    <input type="date" name="deadline" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Application Link *</label>
+                    <input type="url" name="application_link" class="form-control" placeholder="https://..." required>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-end gap-2 mt-4 pt-3 border-top">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('addOpportunityModal').style.display='none'">Cancel</button>
+                <button type="submit" class="btn btn-primary">Post Opportunity</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
